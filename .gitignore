@@ -1,0 +1,16 @@
+build_output.txt
+*.swp
+
+# Singularity
+*.sif
+
+# WRF and WPS
+WRF
+WPS
+LIBRARIES
+TESTS
+
+# Slurm output
+slurm-*.out
+slurm-*.err
+
