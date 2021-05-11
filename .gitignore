@@ -9,8 +9,12 @@ WRF
 WPS
 LIBRARIES
 TESTS
+rsl.*
 
 # Slurm output
 slurm-*.out
 slurm-*.err
+
+# Slurm scripts with private info
+*-PRIVATE.sh
 
