@@ -1,8 +1,9 @@
 wrfrst_d01_2019-11-26_23:00:00
 wrfbdy_d01
-namelist.input
+wrfout_d01_2019-11-27_00:00:00.orig
 freezeH2O.dat
 qr_acr_qg.dat
 qr_acr_qgV2.dat
 qr_acr_qs.dat
 qr_acr_qsV2.dat
+diffwrf.py
