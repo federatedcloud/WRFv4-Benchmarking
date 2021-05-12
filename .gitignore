@@ -1,5 +1,6 @@
 build_output.txt
 *.swp
+*.png
 
 # Singularity
 *.sif
@@ -18,3 +19,4 @@ slurm-*.err
 # Slurm scripts with private info
 *-PRIVATE.sh
 
+results
