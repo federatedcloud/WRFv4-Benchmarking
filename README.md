@@ -12,7 +12,7 @@ The [data](https://www2.mmm.ucar.edu/wrf/users/benchmark/benchdata_v422.html) us
 * [CONUS 2.5-km](https://www2.mmm.ucar.edu/wrf/users/benchmark/v4_bench_conus2.5km.tar.gz)
 
 ## Bare Metal HPC
-WRF 4.2.2 was compiled on Stampede2 with the Intel 18.0.2 compiler for use on the Intel Skylake nodes.  For full instructions on how to compile, set up, and run the benchmarks on bare metal HPC, please see the [Stampede2 README](https://github.com/federatedcloud/WRFv4-Benchmarking/tree/main/Stampede2#building-wrf-422-with-intel-and-running-on-stampede2).
+WRF 4.2.2 was compiled on TACC's Stampede2 supercomputer with the Intel 18.0.2 compiler for use on the Intel Skylake nodes.  For full instructions on how to compile, set up, and run the benchmarks on bare metal HPC, please see the [Stampede2 README](https://github.com/federatedcloud/WRFv4-Benchmarking/tree/main/Stampede2#building-wrf-422-with-intel-and-running-on-stampede2).
 
 
 ## Docker Container
