@@ -36,26 +36,26 @@ RUN mkdir /opt/wrf
 WORKDIR /opt/wrf
 
 ## Set up some useful environment variables
-ENV DIR=/opt/wrf
+ENV MAIN_DIR=/opt/wrf
 ENV WRF_SRC_ROOT_DIR=${DIR}/WRF
-ENV LIBS=${DIR}/LIBRARIES
+ENV DIR=${MAIN_DIR}/LIBRARIES
 ENV CC=icc
 ENV CXX=icpc
 ENV FC=ifort
 ENV FCFLAGS=-m64
 ENV F77=ifort
 ENV FFLAGS=-m64
-ENV JASPERLIB=$LIBS/grib2/lib
-ENV JASPERINC=$LIBS/grib2/include
-ENV LDFLAGS=-L$LIBS/grib2/lib
-ENV CPPFLAGS=-I$LIBS/grib2/include
+ENV JASPERLIB=$DIR/grib2/lib
+ENV JASPERINC=$DIR/grib2/include
+ENV LDFLAGS=-L$DIR/grib2/lib
+ENV CPPFLAGS=-I$DIR/grib2/include
 
 
 
 
 
 ## Install Libraries
-WORKDIR $LIBS
+WORKDIR $DIR
 
 ### zlib 1.2.7
 RUN wget https://zlib.net/fossils/zlib-1.2.7.tar.gz && \
@@ -94,7 +94,7 @@ RUN wget https://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip && \
 
 
 ## Install WRF
-WORKDIR $DIR
+WORKDIR $MAIN_DIR
 
 RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
