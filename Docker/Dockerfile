@@ -34,6 +34,7 @@ RUN apt-get update -y && apt-get install -y \
 #    tmux 
 
 RUN mkdir /opt/wrf
+RUN set -eux
 
 ## Set up some useful environment variables
 ENV MAIN_DIR=/opt/wrf
@@ -43,7 +44,8 @@ ENV I_MPI_CC=icc
 ENV I_MPI_CXX=icpc
 ENV I_MPI_F77=ifort
 ENV I_MPI_F90=ifort
-ENV CC=icc
+#ENV CC=icc
+ENV CC=mpiicc
 ENV CXX=icpc
 ENV FC=mpif90
 ENV FCFLAGS=-m64
@@ -57,11 +59,12 @@ ENV PATH=$PATH:$DIR/grib2
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DIR/grib2/lib
 
 ## Set environment for interactive container shells
-RUN echo export I_MPI_CC=icc >> /etc/bashrc && \
+#RUN echo export I_MPI_CC=icc >> /etc/bashrc && \
+RUN echo export I_MPI_CC=mpiicc >> /etc/bashrc && \
     echo export I_MPI_CXX=icpc >> /etc/bashrc && \
     echo export I_MPI_F77=ifort >> /etc/bashrc && \
     echo export I_MPI_F90=ifort >> /etc/bashrc && \
-    echo export CC=icc >> /etc/bashrc && \
+    echo export CC=mpiicc >> /etc/bashrc && \
     echo export CXX=icpc >> /etc/bashrc && \
     echo export FC=mpif90 >> /etc/bashrc && \
     echo export F77=mpif90 >> /etc/bashrc && \
