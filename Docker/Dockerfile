@@ -44,8 +44,7 @@ ENV I_MPI_CC=icc
 ENV I_MPI_CXX=icpc
 ENV I_MPI_F77=ifort
 ENV I_MPI_F90=ifort
-#ENV CC=icc
-ENV CC=mpiicc
+ENV CC=mpicc
 ENV CXX=icpc
 ENV FC=mpif90
 ENV FCFLAGS=-m64
@@ -59,12 +58,11 @@ ENV PATH=$PATH:$DIR/grib2
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DIR/grib2/lib
 
 ## Set environment for interactive container shells
-#RUN echo export I_MPI_CC=icc >> /etc/bashrc && \
-RUN echo export I_MPI_CC=mpiicc >> /etc/bashrc && \
+RUN echo export I_MPI_CC=icc >> /etc/bashrc && \
     echo export I_MPI_CXX=icpc >> /etc/bashrc && \
     echo export I_MPI_F77=ifort >> /etc/bashrc && \
     echo export I_MPI_F90=ifort >> /etc/bashrc && \
-    echo export CC=mpiicc >> /etc/bashrc && \
+    echo export CC=mpicc >> /etc/bashrc && \
     echo export CXX=icpc >> /etc/bashrc && \
     echo export FC=mpif90 >> /etc/bashrc && \
     echo export F77=mpif90 >> /etc/bashrc && \
@@ -111,8 +109,7 @@ RUN wget https://www.ece.uvic.ca/~frodo/jasper/software/jasper-1.900.1.zip && \
 
 
 ### PHDF5 1.10.4
-RUN export I_MPI_CC=icc && export I_MPI_CXX=icpc && export I_MPI_F77=ifort && export I_MPI_F90=ifort && \
-    wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.4/src/hdf5-1.10.4.tar.gz && \
+RUN wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.4/src/hdf5-1.10.4.tar.gz && \
     tar -xzf hdf5-1.10.4.tar.gz && \
     cd hdf5-1.10.4 && \
     ./configure --enable-fortran --enable-parallel --prefix=$DIR/PHDF5 && \
