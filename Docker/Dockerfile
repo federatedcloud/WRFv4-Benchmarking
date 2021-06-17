@@ -126,6 +126,8 @@ RUN echo export LDFLAGS="-L$PHDF5 -L$DIR/grib2/lib" >> /etc/bashrc
 
 ### PNetCDF 1.11.0
 RUN wget http://cucis.ece.northwestern.edu/projects/PnetCDF/Release/pnetcdf-1.11.0.tar.gz && \
+    tar -xzf pnetcdf-1.11.0.tar.gz && \
+    cd pnetcdf-1.11.0 && \ 
     ./configure --prefix=$PNETCDF --enable-fortran --enable-largefile-test && \
     make install
 
@@ -153,9 +155,8 @@ RUN cd ${NETCDF} && \
 ## Install WRF
 WORKDIR $MAIN_DIR
 
-#ENV LDFLAGS="-L$DIR/grib2/lib -L$PHDF5 -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib"
-#
-#RUN echo export LDFLAGS="-L$DIR/grib2/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib" >> /etc/bashrc && \
+ENV LDFLAGS="-L$DIR/grib2/lib -L$PHDF5 -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib"
+RUN echo export LDFLAGS="-L$DIR/grib2/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib" >> /etc/bashrc && \
 
 RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
@@ -166,17 +167,9 @@ RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     awk -v add=" -L${LIBS}/zlib-1.2.7" '/^ZLIB/ {$0=$0add} 1' configure.wrf > temp && mv temp configure.wrf && \
     time ./compile em_real >& compile_em_real.log
 
-
-
-
-
 ## Install WPS?
+#TODO
 
-
-
-
-
-## 
 
 RUN ldconfig
  
