@@ -23,6 +23,7 @@ RUN apt-get update -y && apt-get install -y \
     unzip \
     gawk \
     time \
+    m4 \
     rsync
 
 ## For development
@@ -121,18 +122,18 @@ RUN wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.4/sr
     ./configure --enable-fortran --enable-parallel --enable-shared --with-zlib=$DIR/grib2 --prefix=$PHDF5 && \
     make && make install && cd ..
 
-ENV LDFLAGS="-L$PHDF5 -L$DIR/grib2/lib"
-RUN echo export LDFLAGS="-L$PHDF5 -L$DIR/grib2/lib" >> /etc/bashrc
+ENV LDFLAGS="-L$PHDF5/lib -L$DIR/grib2/lib"
+RUN echo export LDFLAGS="-L$PHDF5/lib -L$DIR/grib2/lib" >> /etc/bashrc
 
 ### PNetCDF 1.11.0
 RUN wget http://cucis.ece.northwestern.edu/projects/PnetCDF/Release/pnetcdf-1.11.0.tar.gz && \
     tar -xzf pnetcdf-1.11.0.tar.gz && \
     cd pnetcdf-1.11.0 && \ 
-    ./configure --prefix=$PNETCDF --enable-fortran --enable-largefile-test && \
+    ./configure --prefix=$PNETCDF --enable-fortran --enable-shared  && \
     make install
 
-ENV LDFLAGS="-L$PNETCDF -L$PHDF5 -L$DIR/grib2/lib"
-RUN echo export LDFLAGS="-L$PHDF5 -L$DIR/grib2/lib" >> /etc/bashrc
+ENV LDFLAGS="-L$PNETCDF/lib -L$PHDF5/lib -L$DIR/grib2/lib"
+RUN echo export LDFLAGS="-L$PNETCDF/lib -L$PHDF5/lib -L$DIR/grib2/lib" >> /etc/bashrc
 
 ### NetCDF 4.6.2
 RUN mkdir -p ${NETCDF} && \
@@ -141,12 +142,12 @@ RUN mkdir -p ${NETCDF} && \
     wget https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz && \
     tar -xzf v4.6.2.tar.gz && \
     cd netcdf-c-4.6.2 && \
-    ./configure --enable-fortran --disable-static --enable-shared --with-pic --enable-parallel-tests -enable-pnetcdf --enablelarge-file-tests --enable-largefile --prefix=${NETCDF} && \
+    ./configure --enable-fortran --disable-static --disable-dap --enable-shared --with-pic --enable-parallel-tests -enable-pnetcdf --enable-largefile --prefix=${NETCDF} && \
     make && make install
 RUN cd ${NETCDF} && \
     tar -xzf v4.4.5.tar.gz && \
     cd netcdf-fortran-4.4.5 && \
-    ./configure  --disable-static --enableshared --with-pic --enable-parallel-tests --enable-largefile-tests --enable-largefile --prefix=${NETCDF} && \
+    ./configure  --disable-static --enable-shared --with-pic --enable-parallel-tests --prefix=${NETCDF} && \
     make && make install
 
 #ENV NETCDF4=1
@@ -155,8 +156,8 @@ RUN cd ${NETCDF} && \
 ## Install WRF
 WORKDIR $MAIN_DIR
 
-ENV LDFLAGS="-L$DIR/grib2/lib -L$PHDF5 -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib"
-RUN echo export LDFLAGS="-L$DIR/grib2/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib" >> /etc/bashrc && \
+ENV LDFLAGS="-L$DIR/grib2/lib -L$PHDF5/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib"
+RUN echo export LDFLAGS="-L$DIR/grib2/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib" >> /etc/bashrc
 
 RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
@@ -168,7 +169,6 @@ RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     time ./compile em_real >& compile_em_real.log
 
 ## Install WPS?
-#TODO
 
 
 RUN ldconfig
