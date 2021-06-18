@@ -162,11 +162,15 @@ RUN echo export LDFLAGS="-L$DIR/grib2/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNET
 RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
     mv WRF-4.2.2/ WRF && \
+    cd WRF && \
     ./clean -a && \
     echo '66\n1\n' | ./configure && \
     sed -i -e 's/gcc/icc/' ./configure.wrf && \
     awk -v add=" -L${LIBS}/zlib-1.2.7" '/^ZLIB/ {$0=$0add} 1' configure.wrf > temp && mv temp configure.wrf && \
     time ./compile em_real >& compile_em_real.log
+
+#TODO: Add a check that WRF installed correctly, error otherwise
+
 
 ## Install WPS?
 
