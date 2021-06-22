@@ -27,19 +27,19 @@ RUN apt-get update -y && apt-get install -y \
     rsync
 
 ## For development
-#RUN apt install -y \
-#    man \
-#    bash-completion \
-#    vim \ 
-#    htop \
-#    tmux 
+RUN apt install -y \
+    man \
+    bash-completion \
+    vim \ 
+    htop \
+    tmux 
 
 RUN mkdir /opt/wrf
 RUN set -eux
 
 ## Set up some useful environment variables
 ENV MAIN_DIR=/opt/wrf
-ENV WRF_SRC_ROOT_DIR=${DIR}/WRF
+ENV WRF_SRC_ROOT_DIR=${MAIN_DIR}/WRF
 ENV DIR=${MAIN_DIR}/LIBRARIES
 ENV I_MPI_CC=icc
 ENV I_MPI_CXX=icpc
@@ -156,23 +156,27 @@ RUN cd ${NETCDF} && \
 ## Install WRF
 WORKDIR $MAIN_DIR
 
-ENV LDFLAGS="-L$DIR/grib2/lib -L$PHDF5/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib"
-RUN echo export LDFLAGS="-L$DIR/grib2/lib -lm -lnetcdff -L${NETCDF}/lib -L${PNETCDF}/lib" >> /etc/bashrc
+ENV LDFLAGS="-lm -lnetcdff -L${PNETCDF}/lib"
+RUN echo export LDFLAGS="-lm -lnetcdff -L${PNETCDF}/lib" >> /etc/bashrc
 
+### Get v4.2.2 archive
 RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
-    mv WRF-4.2.2/ WRF && \
-    cd WRF && \
+    mv WRF-4.2.2/ WRF
+
+### Configure
+RUN cd WRF && \
     ./clean -a && \
     echo '66\n1\n' | ./configure && \
     sed -i -e 's/gcc/icc/' ./configure.wrf && \
-    awk -v add=" -L${LIBS}/zlib-1.2.7" '/^ZLIB/ {$0=$0add} 1' configure.wrf > temp && mv temp configure.wrf && \
-    time ./compile em_real >& compile_em_real.log
+    awk -v add=" -L${DIR}/zlib-1.2.7" '/^ZLIB/ {$0=$0add} 1' configure.wrf > temp && mv temp configure.wrf
+
+### Compile
+#RUN time ./compile em_real 2>&1 | tee compile_em_real.log
+
 
 #TODO: Add a check that WRF installed correctly, error otherwise
-
-
-## Install WPS?
+#TODO: Install WPS?
 
 
 RUN ldconfig
