@@ -26,14 +26,6 @@ RUN apt-get update -y && apt-get install -y \
     m4 \
     rsync
 
-## For development
-RUN apt install -y \
-    man \
-    bash-completion \
-    vim \ 
-    htop \
-    tmux 
-
 RUN mkdir /opt/wrf
 RUN set -eux
 
@@ -164,19 +156,28 @@ RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
     mv WRF-4.2.2/ WRF
 
+WORKDIR $WRF_SRC_ROOT_DIR
+
 ### Configure
-RUN cd WRF && \
-    ./clean -a && \
+RUN ./clean -a && \
     echo '66\n1\n' | ./configure && \
     sed -i -e 's/gcc/icc/' ./configure.wrf && \
     awk -v add=" -L${DIR}/zlib-1.2.7" '/^ZLIB/ {$0=$0add} 1' configure.wrf > temp && mv temp configure.wrf
 
 ### Compile
-#RUN time ./compile em_real 2>&1 | tee compile_em_real.log
+RUN time ./compile em_real 2>&1 | tee compile_em_real.log
 
 
 #TODO: Add a check that WRF installed correctly, error otherwise
 #TODO: Install WPS?
+
+## For development
+#RUN apt install -y \
+#    man \
+#    bash-completion \
+#    vim \ 
+#    htop \
+#    tmux 
 
 
 RUN ldconfig
