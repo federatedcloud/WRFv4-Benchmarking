@@ -1,4 +1,6 @@
-FROM intel/oneapi-hpckit:devel-ubuntu18.04
+FROM intel/oneapi-hpckit@sha256:7415915e0b8eede7bba8b39aa9261ee08f3c57382b225d5240086c5c512afcbc
+#FROM intel/oneapi-hpckit:devel-ubuntu18.04
+
 # Intel OneAPI HPC Toolkit
 # Ubuntu 18.04 base
 
@@ -114,57 +116,66 @@ RUN wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.4/sr
     ./configure --enable-fortran --enable-parallel --enable-shared --with-zlib=$DIR/grib2 --prefix=$PHDF5 && \
     make && make install && cd ..
 
+### PNetCDF 1.11.0
 ENV LDFLAGS="-L$PHDF5/lib -L$DIR/grib2/lib"
 RUN echo export LDFLAGS="-L$PHDF5/lib -L$DIR/grib2/lib" >> /etc/bashrc
 
-### PNetCDF 1.11.0
 RUN wget http://cucis.ece.northwestern.edu/projects/PnetCDF/Release/pnetcdf-1.11.0.tar.gz && \
     tar -xzf pnetcdf-1.11.0.tar.gz && \
     cd pnetcdf-1.11.0 && \ 
     ./configure --prefix=$PNETCDF --enable-fortran --enable-shared  && \
     make install
 
+### NetCDF-C 4.6.2
 ENV LDFLAGS="-L$PNETCDF/lib -L$PHDF5/lib -L$DIR/grib2/lib"
 RUN echo export LDFLAGS="-L$PNETCDF/lib -L$PHDF5/lib -L$DIR/grib2/lib" >> /etc/bashrc
 
-### NetCDF 4.6.2
 RUN mkdir -p ${NETCDF} && \
     cd ${NETCDF} && \
     wget https://github.com/Unidata/netcdf-c/archive/v4.6.2.tar.gz && \
-    wget https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz && \
     tar -xzf v4.6.2.tar.gz && \
     cd netcdf-c-4.6.2 && \
-    ./configure --enable-fortran --disable-static --disable-dap --enable-shared --with-pic --enable-parallel-tests -enable-pnetcdf --enable-largefile --prefix=${NETCDF} && \
+    ./configure --enable-fortran --enable-netcdf-4 --disable-static --disable-dap --enable-shared --with-pic --enable-parallel-tests -enable-pnetcdf --enable-largefile --prefix=${NETCDF} && \
     make && make install
+
+### NetCDF-Fortran 4.5.3
+ENV LDFLAGS="-L$NETCDF/lib -L$PNETCDF/lib -L$PHDF5/lib -L$DIR/grib2/lib"
+ENV LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH}
+RUN echo export LDFLAGS="-L$NETCDF/lib -L$PNETCDF/lib -L$PHDF5/lib -L$DIR/grib2/lib" >> /etc/bashrc && \
+    echo export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} >> /etc/bashrc
+
 RUN cd ${NETCDF} && \
-    tar -xzf v4.4.5.tar.gz && \
-    cd netcdf-fortran-4.4.5 && \
+#    wget https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz && \
+#    tar -xzf v4.4.5.tar.gz && \
+    wget https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.5.2.tar.gz && \
+    tar -xzf v4.5.2.tar.gz && \
+    cd netcdf-fortran-4.5.2 && \
     ./configure  --disable-static --enable-shared --with-pic --enable-parallel-tests --prefix=${NETCDF} && \
     make && make install
 
-#ENV NETCDF4=1
-#RUN echo export export NETCDF4=1 >> /etc/bashrc
+ENV NETCDF4=1
+RUN echo export export NETCDF4=1 >> /etc/bashrc
 
-## Install WRF
+## Install WRF 4.2.2
 WORKDIR $MAIN_DIR
 
-ENV LDFLAGS="-lm -lnetcdff -L${PNETCDF}/lib"
+ENV LDFLAGS="-lm -lnetcdf -lnetcdff -L${PNETCDF}/lib"
 RUN echo export LDFLAGS="-lm -lnetcdff -L${PNETCDF}/lib" >> /etc/bashrc
 
-### Get v4.2.2 archive
+### Get WRF v4.2.2 tar archive
 RUN wget https://github.com/wrf-model/WRF/archive/refs/tags/v4.2.2.tar.gz && \
     tar -zxf v4.2.2.tar.gz && \
     mv WRF-4.2.2/ WRF
 
 WORKDIR $WRF_SRC_ROOT_DIR
 
-### Configure
+### Configure WRF
 RUN ./clean -a && \
     echo '66\n1\n' | ./configure && \
     sed -i -e 's/gcc/icc/' ./configure.wrf && \
     awk -v add=" -L${DIR}/zlib-1.2.7" '/^ZLIB/ {$0=$0add} 1' configure.wrf > temp && mv temp configure.wrf
 
-### Compile
+### Compile WRF
 RUN time ./compile em_real 2>&1 | tee compile_em_real.log
 
 
@@ -172,12 +183,13 @@ RUN time ./compile em_real 2>&1 | tee compile_em_real.log
 #TODO: Install WPS?
 
 ## For development
-#RUN apt install -y \
-#    man \
-#    bash-completion \
-#    vim \ 
-#    htop \
-#    tmux 
+#TODO: Comment these out for production
+RUN apt install -y \
+    man \
+    bash-completion \
+    vim \ 
+    htop \
+    tmux 
 
 
 RUN ldconfig
