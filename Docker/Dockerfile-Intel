@@ -31,6 +31,17 @@ RUN apt-get update -y && apt-get install -y \
 RUN mkdir /opt/wrf
 RUN set -eux
 
+## Stacksize - WRF is greedy
+## See https://forum.mmm.ucar.edu/phpBB3/viewtopic.php?t=133
+## Setting OS stacksize to unlimited, setting OpenMP stacksize to 64GB (KMP_STACKSIZE is for Intel)
+ENV OMP_STACKSIZE=96G
+ENV KMP_STACKSIZE=96G
+
+RUN ulimit -s unlimited && \
+    echo ulimit -s unlimited >> /etc/bashrc && \
+    echo export OMP_STACKSIZE=96G >> /etc/bashrc && \
+    echo export KMP_STACKSIZE=96G >> /etc/bashrc
+
 ## Set up some useful environment variables
 ENV MAIN_DIR=/opt/wrf
 ENV WRF_SRC_ROOT_DIR=${MAIN_DIR}/WRF
@@ -56,7 +67,6 @@ ENV PATH=${NETCDF}/bin:${PNETCDF}/bin:$PATH:$DIR/grib2
 ENV LD_LIBRARY_PATH=$PHDF5/lib:$PNETCDF/lib:$NETCDF/lib:$LD_LIBRARY_PATH:$DIR/grib2/lib
 ENV WRFIO_NCD_LARGE_FILE_SUPPORT=1
 ENV WRF_EM_CORE=1
-ENV KMP_STACKSIZE=512m
 
 ## Set environment for interactive container shells
 RUN echo export WRF_SRC_ROOT_DIR=${DIR}/WRF >> /etc/bashrc && \
@@ -81,7 +91,6 @@ RUN echo export WRF_SRC_ROOT_DIR=${DIR}/WRF >> /etc/bashrc && \
     echo export LD_LIBRARY_PATH=$PHDF5/lib:$PNETCDF/lib:$NETCDF/lib:$LD_LIBRARY_PATH:$DIR/grib2/lib >> /etc/bashrc && \
     echo export WRFIO_NCD_LARGE_FILE_SUPPORT=1 >> /etc/bashrc && \
     echo export WRF_EM_CORE=1 >> /etc/bashrc && \
-    echo export KMP_STACKSIZE=512m >> /etc/bashrc
 
 ## Install Libraries
 WORKDIR $DIR

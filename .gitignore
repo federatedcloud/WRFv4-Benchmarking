@@ -1,4 +1,4 @@
-build_output.txt
+output_*_build.txt
 *.swp
 *.png
 
