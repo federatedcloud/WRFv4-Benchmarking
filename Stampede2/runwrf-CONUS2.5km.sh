@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p skx-dev
 #SBATCH -N 4
-#SBATCH -n 48
+#SBATCH --tasks-per-node=48
 #SBATCH -t 01:00:00
 #SBATCH -A ADD_PROJECT_NAME_HERE
 #SBATCH -J wrf4-CONUS2.5-multinode
