@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: cornellcac/wrf:4.2.2
+From: cornellcac/wrf:4.2.2-intel-7415915e0b8e
 
 %labels
     Author pete@CAC
