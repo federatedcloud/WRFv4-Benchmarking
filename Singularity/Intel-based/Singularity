@@ -1,0 +1,13 @@
+Bootstrap: docker
+From: cornellcac/wrf:4.2.2-intel-7415915e0b8e
+
+%labels
+    Author pete@CAC
+    Version v4.2.2
+
+%help
+    This is a container for WRF benchmarking intended for use on HPC
+    and HPC-like cloud resources.  It uses an Intel OneAPI HPC Toolkit
+    Ubuntu 18.04 base image, configures the environment to use Intel
+    compilers and MPI libraries, compiles WRF dependencies, and
+    compiles WRF 4.2.2.
