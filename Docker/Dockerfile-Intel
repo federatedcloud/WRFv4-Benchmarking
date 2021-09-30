@@ -172,7 +172,7 @@ RUN echo export export NETCDF4=1 >> /etc/bashrc
 ## Install WRF 4.2.2
 WORKDIR $MAIN_DIR
 
-ENV LDFLAGS="-lm -lnetcdf -lnetcdff -L${PNETCDF}/lib"
+ENV LDFLAGS="-lm -lnetcdff -lnetcdf -L${PNETCDF}/lib"
 RUN echo export LDFLAGS="-lm -lnetcdff -L${PNETCDF}/lib" >> /etc/bashrc
 
 ### Get WRF v4.2.2 tar archive
@@ -197,7 +197,7 @@ RUN time ./compile em_real 2>&1 | tee compile_em_real.log
 
 ## For development
 #TODO: Comment these out for production
-RUN apt install -y \
+RUN apt-get install -y \
     man \
     bash-completion \
     vim \ 
