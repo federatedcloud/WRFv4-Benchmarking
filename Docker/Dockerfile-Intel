@@ -18,11 +18,14 @@ ARG HOME=/root
 
 #ARG DEBIAN_FRONTEND=noninteractive  # Intel Dockerfile does this
 
+## Install tools
 RUN apt-get update -y && apt-get install -y \
     cmake \
     tcsh \
     wget \
     unzip \
+    tar \
+    curl \
     gawk \
     time \
     m4 \
@@ -30,6 +33,17 @@ RUN apt-get update -y && apt-get install -y \
 
 RUN mkdir /opt/wrf
 RUN set -eux
+
+## Stacksize - WRF is greedy
+## See https://forum.mmm.ucar.edu/phpBB3/viewtopic.php?t=133
+## Setting OS stacksize to unlimited, setting OpenMP stacksize to 64GB (KMP_STACKSIZE is for Intel)
+ENV OMP_STACKSIZE=96G
+ENV KMP_STACKSIZE=96G
+
+RUN ulimit -s unlimited && \
+    echo ulimit -s unlimited >> /etc/bashrc && \
+    echo export OMP_STACKSIZE=96G >> /etc/bashrc && \
+    echo export KMP_STACKSIZE=96G >> /etc/bashrc
 
 ## Set up some useful environment variables
 ENV MAIN_DIR=/opt/wrf
@@ -56,10 +70,10 @@ ENV PATH=${NETCDF}/bin:${PNETCDF}/bin:$PATH:$DIR/grib2
 ENV LD_LIBRARY_PATH=$PHDF5/lib:$PNETCDF/lib:$NETCDF/lib:$LD_LIBRARY_PATH:$DIR/grib2/lib
 ENV WRFIO_NCD_LARGE_FILE_SUPPORT=1
 ENV WRF_EM_CORE=1
-ENV KMP_STACKSIZE=512m
 
 ## Set environment for interactive container shells
-RUN echo export WRF_SRC_ROOT_DIR=${DIR}/WRF >> /etc/bashrc && \
+RUN echo export MAIN_DIR=/opt/wrf >> /etc/bashrc && \
+    echo export WRF_SRC_ROOT_DIR=${DIR}/WRF >> /etc/bashrc && \
     echo export DIR=${MAIN_DIR}/LIBRARIES >> /etc/bashrc && \
     echo export I_MPI_CC=icc >> /etc/bashrc && \
     echo export I_MPI_CXX=icpc >> /etc/bashrc && \
@@ -80,8 +94,7 @@ RUN echo export WRF_SRC_ROOT_DIR=${DIR}/WRF >> /etc/bashrc && \
     echo export PATH=$PATH:$DIR/grib2 >> /etc/bashrc && \
     echo export LD_LIBRARY_PATH=$PHDF5/lib:$PNETCDF/lib:$NETCDF/lib:$LD_LIBRARY_PATH:$DIR/grib2/lib >> /etc/bashrc && \
     echo export WRFIO_NCD_LARGE_FILE_SUPPORT=1 >> /etc/bashrc && \
-    echo export WRF_EM_CORE=1 >> /etc/bashrc && \
-    echo export KMP_STACKSIZE=512m >> /etc/bashrc
+    echo export WRF_EM_CORE=1 >> /etc/bashrc
 
 ## Install Libraries
 WORKDIR $DIR
@@ -159,7 +172,7 @@ RUN echo export export NETCDF4=1 >> /etc/bashrc
 ## Install WRF 4.2.2
 WORKDIR $MAIN_DIR
 
-ENV LDFLAGS="-lm -lnetcdf -lnetcdff -L${PNETCDF}/lib"
+ENV LDFLAGS="-lm -lnetcdff -lnetcdf -L${PNETCDF}/lib"
 RUN echo export LDFLAGS="-lm -lnetcdff -L${PNETCDF}/lib" >> /etc/bashrc
 
 ### Get WRF v4.2.2 tar archive
@@ -184,7 +197,7 @@ RUN time ./compile em_real 2>&1 | tee compile_em_real.log
 
 ## For development
 #TODO: Comment these out for production
-RUN apt install -y \
+RUN apt-get install -y \
     man \
     bash-completion \
     vim \ 
